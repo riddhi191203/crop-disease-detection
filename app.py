@@ -5,10 +5,20 @@ from tensorflow.keras.utils import img_to_array
 from PIL import Image
 
 st.set_page_config(
-    page_title="Crop Disease Detection",
+    page_title="Native Crop Disease Detection",
     page_icon="🌾",
-    layout="centered"
+    layout="wide"
 )
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+        }
+        header {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
 
 MODEL_PATH = r"D:\ml_projects\crop_disease_detection_model_3.h5"
 model = load_model(MODEL_PATH)
@@ -52,34 +62,40 @@ st.sidebar.info(
     """
 )
 
-st.markdown("<h1 style='text-align:center;color:#2E8B57;'>🌾 Crop Disease Detection</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>Upload a leaf image to identify crop and disease.</p>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center;color:#2E8B57;margin-bottom:0;'>🌾 Native Crop Disease Detection using CNN</h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;margin-top:2px;'>Upload a leaf image to identify crop and disease.</p>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("📤 Upload Leaf Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Leaf Image", use_column_width=True)
-    st.markdown("---")
 
-    if st.button("🔍 Predict"):
-        with st.spinner("Analyzing..."):
-            prediction, confidence = predict_disease(image)
+    col1, col2 = st.columns([1, 1])
 
-        parts = prediction.split("_")
-        crop = parts[0].title()
-        disease = " ".join(parts[1:]).title()
+    with col1:
+        st.markdown("#### 📷 Leaf Image")
+        st.image(image, width=250)
 
-        st.markdown("### 🌿 Prediction Result")
 
-        if disease.lower() == "healthy":
+    with col2:
+        st.markdown("#### 🌿 Prediction Panel")
+
+        if st.button("🔍 Predict", use_container_width=True):
+            with st.spinner("Analyzing..."):
+                prediction, confidence = predict_disease(image)
+
+            parts = prediction.split("_")
+            crop = parts[0].title()
+            disease = " ".join(parts[1:]).title()
+
             st.success(f"**Crop:** {crop}")
-            st.success("**Status:** Healthy Plant ✅")
-        else:
-            st.success(f"**Crop:** {crop}")
-            st.error(f"**Disease:** {disease}")
 
-        st.progress(int(confidence))
-        st.info(f"Confidence: **{confidence:.2f}%**")
+            if disease.lower() == "healthy":
+                st.success("**Status:** Healthy Plant ✅")
+            else:
+                st.error(f"**Disease:** {disease}")
 
-st.markdown("<hr><p style='text-align:center;'>Deep Learning Powered Crop Health System</p>", unsafe_allow_html=True)
+            st.progress(int(confidence))
+            st.info(f"Confidence: **{confidence:.2f}%**")
+
+st.markdown("<p style='text-align:center;font-size:12px;'>Deep Learning Powered Crop Health System</p>", unsafe_allow_html=True)
